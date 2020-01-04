@@ -1,38 +1,34 @@
-// Pegar as listas de pessoas
-var $list = document.querySelectorAll('.uiList');
-
-// Variável para armazenar os aniversários
-var aniversarios = [];
+// Variáveis
+var $body = document.querySelector('body');
+var $peopleLists = document.querySelectorAll('#birthdays_content .uiList');
+var peopleInfo = [];
+var $peopleInfoBoxTemplate = `<textarea name="people-info" id="people-info"></textarea>`;
+$body.insertAdjacentHTML('afterbegin', $peopleInfoBoxTemplate);
 
 // Passando por todas as litas
-$list.forEach(ul => {
-	var lis = ul.querySelectorAll('li a');
+$peopleLists.forEach($list => {
+	var $people = $list.querySelectorAll('li a');
 
 	// passando por cada pessoa encontrada em cada lista
-	lis.forEach(as => {
-			var niver = as.getAttribute('data-tooltip-content');
-			var niverInfo = niver ? niver.split('(') : '';
+	$people.forEach(person => {
+			var personData = person.getAttribute('data-tooltip-content');
+			var personNameAndBirthday = personData && personData.split(/\s?[()]/g);
+			var personImage = personData && person.querySelector('img');
 
-			// Criando um objeto com as informações separadas
-			/*
-				* TODO:
-				* Rever o split para separar melhor essas informações
-			*/
-			aniversarios.push({
-					nome: niverInfo[0],
-					data: niverInfo[1]
+			peopleInfo.push({
+					name: personNameAndBirthday[0],
+					birthday: personNameAndBirthday[1],
+					image: personImage.getAttribute('src'),
 			});
 	});
 });
 
-// Criar um box no DOM
-/*
-	* TODO:
-	* Criar box via JS
-	* Criar um <textarea>
-	* Usar a função 'copy' do browser ex: document.execCommand("copy");
-*/
-var box = document.querySelector('#douglas');
+var $peopleInfoBox = document.querySelector('#people-info');
+$peopleInfoBox.value = '';
 
-// Depois de criar o Box, printar todo o resultado para poder copiar
-aniversarios.map(niv => box.textContent += JSON.stringify(niv));
+peopleInfo.map(personInfo => $peopleInfoBox.value += `${JSON.stringify(personInfo)} ,`);
+
+$peopleInfoBox.select();
+document.execCommand('copy');
+
+alert('Informações copiadas');
