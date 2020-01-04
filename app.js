@@ -1,34 +1,34 @@
-// Variáveis
 var $body = document.querySelector('body');
-var $peopleLists = document.querySelectorAll('#birthdays_content .uiList');
-var peopleInfo = [];
-var $peopleInfoBoxTemplate = `<textarea name="people-info" id="people-info"></textarea>`;
-$body.insertAdjacentHTML('afterbegin', $peopleInfoBoxTemplate);
+var $people = [...document.querySelectorAll('#birthdays_content .uiList li a')];
+var $peopleInfoBox;
 
-// Passando por todas as litas
-$peopleLists.forEach($list => {
-	var $people = $list.querySelectorAll('li a');
+var peopleInfo = $people.map(person => {
+	const dataContent = person.getAttribute('data-tooltip-content');
 
-	// passando por cada pessoa encontrada em cada lista
-	$people.forEach(person => {
-			var personData = person.getAttribute('data-tooltip-content');
-			var personNameAndBirthday = personData && personData.split(/\s?[()]/g);
-			var personImage = personData && person.querySelector('img');
+	if (!dataContent) return null;
 
-			peopleInfo.push({
-					name: personNameAndBirthday[0],
-					birthday: personNameAndBirthday[1],
-					image: personImage.getAttribute('src'),
-			});
-	});
-});
+	const personData  = dataContent.split(/\s?[()]/g);
+	const personImage = person.querySelector('img');
+	const [ name, birthday ] = personData;
 
-var $peopleInfoBox = document.querySelector('#people-info');
-$peopleInfoBox.value = '';
+	return {
+		name,
+		birthday,
+		image : personImage.getAttribute('src'),
+	};
+}).filter(data => data !== null);
 
-peopleInfo.map(personInfo => $peopleInfoBox.value += `${JSON.stringify(personInfo)} ,`);
+var convertToJSON = (data, name = 'data') => `{ "${name}": ${JSON.stringify(data)} }`;
 
-$peopleInfoBox.select();
-document.execCommand('copy');
+var copyData = data => {
+	$peopleInfoBox = document.createElement('textarea');
+	$peopleInfoBox.style = { position: 'fixed', top: '-100%' };
+	$peopleInfoBox.value = convertToJSON(data, 'aniversarios');
+	$body.appendChild($peopleInfoBox);
+	$peopleInfoBox.select();
+	document.execCommand('copy');
+	$body.removeChild($peopleInfoBox);
+	console.log('Informações copiadas');
+};
 
-alert('Informações copiadas');
+copyData(peopleInfo);
